@@ -4,11 +4,21 @@ const cors = require('cors');
 const { sequelize } = require('./models');
 
 dotenv.config(); // Load env first
+console.log('🔑 JWT_SECRET loaded:', !!process.env.JWT_SECRET);
+
 
 const app = express(); // Create app instance before using it
 
 app.use(cors());
 app.use(express.json());
+app.use((req, res, next) => {
+  console.log(`📥 ${new Date().toISOString()} - ${req.method} ${req.originalUrl}`);
+  console.log('📥 Headers:', req.headers.authorization ? 'Auth present' : 'No auth');
+  next();
+});
+
+app.use('/uploads', express.static('uploads'));
+
 app.use('/uploads', express.static('uploads'));
 
 
@@ -21,6 +31,10 @@ app.use('/api/customers', customerRoutes);
 
 const transactionRoutes = require('./routes/transaction.routes');
 app.use('/api/transactions', transactionRoutes);
+
+const reportRoutes = require('./routes/report.routes');
+app.use('/api/reports', reportRoutes);
+
 
 
 // Base route
