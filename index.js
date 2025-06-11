@@ -4,8 +4,6 @@ const cors = require('cors');
 const { sequelize } = require('./models');
 
 dotenv.config(); // Load env first
-console.log('🔑 JWT_SECRET loaded:', process.env.JWT_SECRET);
-console.log('env vars: ', process.env)
 
 
 const app = express(); // Create app instance before using it
