@@ -28,21 +28,41 @@ const register = async (req, res) => {
 const login = async (req, res) => {
   try {
     const { phone, password } = req.body;
+
+    if (!phone || !password) {
+      return res.status(400).json({ error: 'Phone number and password are required' });
+    }
+
     const user = await Agent.findOne({ where: { phone } });
 
-    if (!user) return res.status(404).json({ error: 'User not found' });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
 
     const isMatch = await bcrypt.compare(password, user.passwordHash);
-    if (!isMatch) return res.status(401).json({ error: 'Invalid credentials' });
+    if (!isMatch) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
 
     const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
-    res.json({ token, user: { id: user.id, name: user.name, role: user.role } });
+    return res.json({
+      token,
+      user: {
+        id: user.id,
+        name: user.name,
+        phone: user.phone,
+        location: user.location,
+        role: user.role
+      }
+    });
+
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Login failed' });
+    console.error('🔴 Login error:', err);
+    return res.status(500).json({ error: 'Server error during login' });
   }
 };
+
 
 const getProfile = async (req, res) => {
   try {
